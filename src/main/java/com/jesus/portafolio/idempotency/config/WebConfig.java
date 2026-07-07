@@ -9,7 +9,7 @@ import com.jesus.portafolio.idempotency.interceptor.IdempotencyInterceptor;
 @Configuration
 public class WebConfig implements WebMvcConfigurer{
 
-     private final IdempotencyInterceptor interceptor;
+    private final IdempotencyInterceptor interceptor;
 
     public WebConfig(IdempotencyInterceptor interceptor) {
         this.interceptor = interceptor;
@@ -20,9 +20,5 @@ public class WebConfig implements WebMvcConfigurer{
         registry.addInterceptor(interceptor)
                 .addPathPatterns("/api/**");
     }
-
-    
-
-    
 
 }
