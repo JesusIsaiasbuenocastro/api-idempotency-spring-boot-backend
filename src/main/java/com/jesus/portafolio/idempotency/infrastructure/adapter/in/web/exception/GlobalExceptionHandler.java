@@ -1,4 +1,4 @@
-package com.jesus.portafolio.idempotency.exceptions;
+package com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.exception;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
