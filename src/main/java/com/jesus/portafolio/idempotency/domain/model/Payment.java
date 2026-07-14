@@ -1,36 +1,13 @@
 package com.jesus.portafolio.idempotency.domain.model;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
-public class Payment {
-    public String orderId;
-    public BigDecimal amount;
-    public String currency;
-
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-
-}
-
+public record Payment (
+        String transactionId,
+        String accountId,
+        Double amount,
+        String currency,
+        PaymentStatus status,
+        Instant processedAt
+){}

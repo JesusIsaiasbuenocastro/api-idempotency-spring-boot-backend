@@ -1,5 +1,14 @@
 package com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.dto;
 
-public class PaymentResponse {
+import java.time.Instant;
 
+public record PaymentResponse(
+        String transactionId,
+        String accountId,
+        Double amount,
+        String currency,
+        String status,
+        Instant processedAt
+) {
 }
+

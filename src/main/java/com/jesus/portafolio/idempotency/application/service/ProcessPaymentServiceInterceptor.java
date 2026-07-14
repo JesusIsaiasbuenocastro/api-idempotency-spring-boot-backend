@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 public class ProcessPaymentServiceInterceptor implements ProcessPaymentUseCase {
 
     @Override
-    public boolean save(String paymentModel) {
-        return false;
+    public <T> T save(PaymentCommand paymentCommand) {
+        return null;
     }
 }

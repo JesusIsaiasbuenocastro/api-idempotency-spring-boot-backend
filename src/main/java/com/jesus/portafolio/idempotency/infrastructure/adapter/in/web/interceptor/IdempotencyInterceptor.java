@@ -2,8 +2,12 @@ package com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.intercept
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 
-import com.jesus.portafolio.idempotency.application.service.ProcessPaymentServiceInterceptor;
+import com.jesus.portafolio.idempotency.application.port.out.IdempotencyDecision;
+import com.jesus.portafolio.idempotency.application.port.out.IdempotencyStoragePort;
+import com.jesus.portafolio.idempotency.application.port.out.IdempotentPayload;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -15,62 +19,95 @@ import com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.exception.
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @Component
 public class IdempotencyInterceptor implements HandlerInterceptor {
-    
-    
-   private final ProcessPaymentServiceInterceptor service;
 
-   private static final String HEADER_NAME = "x-idempotency-key";
+    private static final String HEADER_NAME = "x-idempotency-key";
+    private static final String ATTR_KEY = "idempotency.key";
+    private static final String ATTR_TTL = "idempotency.ttl";
 
-    public IdempotencyInterceptor(ProcessPaymentServiceInterceptor service) {
-        this.service = service;
+   private final IdempotencyStoragePort idempotencyStoragePort;
+
+    public IdempotencyInterceptor(IdempotencyStoragePort idempotencyStoragePort) {
+        this.idempotencyStoragePort = idempotencyStoragePort;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-                
-                //Validación del metodo a aplicar la idempotencia
-                if(!(handler instanceof HandlerMethod)){
-                    return true;
-                }
 
-                HandlerMethod handlerMethod = (HandlerMethod) handler;
-                Idempotency annotation = handlerMethod.getMethodAnnotation(Idempotency.class);
-                
-                if(annotation == null){
-                    return true;
-                }
+        //Validación del metodo a aplicar la idempotencia
+        if(!(handler instanceof HandlerMethod handlerMethod)){
+            return true;
+        }
 
-                //Validación del header
+        Idempotency annotation = handlerMethod.getMethodAnnotation(Idempotency.class);
 
-                String key = request.getHeader(HEADER_NAME);
-                if (key == null || key.isBlank()) {
-                    throw new MissingIdempotencyKeyException(
-                            "Este endpoint requiere la cabecera '" + HEADER_NAME + "' para evitar operaciones duplicadas.");
-                }
+        if(annotation == null){
+            return true;
+        }
 
-                //hash del body 
-                String body =    extractBody(request);  
+        //Validacion del header
+        String key = request.getHeader(HEADER_NAME);
+        if (key == null || key.isBlank()) {
+            throw new MissingIdempotencyKeyException(
+                    "Este endpoint requiere la cabecera '" + HEADER_NAME + "' para evitar operaciones duplicadas.");
+        }
 
-                //validacion de la cache con el header
+        //hash del body
+        String body = (String) request.getAttribute("cachedBody");
+        String hash = hashRequest(request.getMethod(), request.getRequestURI(), body);
 
-            
+        IdempotencyDecision idempotencyDecision = idempotencyStoragePort.begin(
+                key,hash, request.getMethod()+ " " +request.getRequestURI(), annotation.ttlSeconds() );
 
+        if(idempotencyDecision.isCached()){
+            writeCachedResponse(response, idempotencyDecision.cachedPayload());
+            return false; //No llega a consumir de nuevo el controller trunca el proceso
+        }
 
+        //Guarda el payload en la cache
+        request.setAttribute(ATTR_KEY,key);
+        request.setAttribute(ATTR_TTL,annotation.ttlSeconds());
 		return true;
 	}
 
-    private String extractBody(HttpServletRequest request) throws IOException {
-        if (request instanceof ContentCachingRequestWrapper wrapper) {
-            // En preHandle el body todavía no fue leído por Spring MVC, así
-            // que forzamos la lectura completa para poblar el buffer interno.
-            byte[] buf = StreamUtils.copyToByteArray(wrapper.getInputStream());
-            return new String(buf, StandardCharsets.UTF_8);
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        String key = (String) request.getAttribute(ATTR_KEY);
+        if (key == null) {
+            return;
         }
-        return "";
+
+        if (ex != null) {
+            idempotencyStoragePort.fail(key);
+            return;
+        }
+
+        if (response instanceof ContentCachingResponseWrapper wrapper) {
+            String body = new String(wrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
+            long ttlSeconds = (long) request.getAttribute(ATTR_TTL);
+            idempotencyStoragePort.complete(
+                    key, new IdempotentPayload(wrapper.getStatus(), body, wrapper.getContentType()), ttlSeconds);
+        }
+    }
+
+    private String hashRequest(String method, String path, String body) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        String raw = method + "|" + path + "|" + (body == null ? "" : body);
+        byte[] hash = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
+        return HexFormat.of().formatHex(hash);
+    }
+
+    private void writeCachedResponse(HttpServletResponse response, IdempotentPayload cached) throws IOException {
+        response.setStatus(cached.httpStatus() != null ? cached.httpStatus() : 200);
+        if (cached.contentType() != null) {
+            response.setContentType(cached.contentType());
+        }
+        response.setHeader("Idempotent-Replayed", "true");
+        response.getWriter().write(cached.body() == null ? "" : cached.body());
     }
 
 }

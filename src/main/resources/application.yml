@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: idempotency
+
+server:
+  port: 8082

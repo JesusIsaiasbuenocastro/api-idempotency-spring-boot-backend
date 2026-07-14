@@ -1,6 +1,7 @@
 package com.jesus.portafolio.idempotency.filter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,24 +14,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class CachingFilter extends OncePerRequestFilter{
+public class CachingFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-        HttpServletResponse response, 
-        FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 1024 * 1024);
-        ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
+        ContentCachingRequestWrapper requestWrapper =
+                new ContentCachingRequestWrapper(request);
 
-        try {
-            filterChain.doFilter(wrappedRequest, wrappedResponse);
-        } finally {
-            // Sin esto, el cliente nunca recibiría el body real: quedaría
-            // atrapado en el buffer interno del wrapper.
-            wrappedResponse.copyBodyToResponse();
-        }    
+        ContentCachingResponseWrapper responseWrapper =
+                new ContentCachingResponseWrapper(response);
+
+        filterChain.doFilter(requestWrapper, responseWrapper);
+
+        String body = new String(requestWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
+
+        request.setAttribute("cachedBody", body);
+
+        responseWrapper.copyBodyToResponse();
     }
-
-   
 }
