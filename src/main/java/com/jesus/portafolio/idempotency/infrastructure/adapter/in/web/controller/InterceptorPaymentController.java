@@ -30,16 +30,22 @@ public class InterceptorPaymentController {
 
 
     @PostMapping
-    @Idempotency(ttlSeconds=390)
+    @Idempotency(ttlSeconds=86400)
     public ResponseEntity<PaymentResponse> postMethodName(@Valid @RequestBody PaymentRequest request) {
         var payment = processPaymentUseCase.save(PaymentWebMapper.toCommand(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(PaymentWebMapper.toResponse((Payment) payment));
     }
 
-     @GetMapping
-     public String getMethodName() {
-         return "Consultar todos";
-     }
+    @PostMapping("/unsafe")
+    public ResponseEntity<PaymentResponse> createPaymentUnsafe(@Valid @RequestBody PaymentRequest request) {
+        var payment = processPaymentUseCase.save(PaymentWebMapper.toCommand(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(PaymentWebMapper.toResponse(payment));
+    }
+
+    @GetMapping("/executions-count")
+    public ResponseEntity<Integer> getExecutionsCount() {
+        return ResponseEntity.ok(processPaymentUseCase.countProcessedPayments());
+    }
       
 
 }

@@ -31,4 +31,10 @@ public class ProcessPaymentServiceInterceptor implements ProcessPaymentUseCase {
         return paymentRepositoryPort.save(payment);
 
     }
+
+    @Override
+    public int countProcessedPayments() {
+        return paymentRepositoryPort.countProcessed();
+
+    }
 }

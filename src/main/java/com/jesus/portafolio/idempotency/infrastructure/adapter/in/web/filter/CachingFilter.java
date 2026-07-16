@@ -1,4 +1,4 @@
-package com.jesus.portafolio.idempotency.filter;
+package com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.filter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

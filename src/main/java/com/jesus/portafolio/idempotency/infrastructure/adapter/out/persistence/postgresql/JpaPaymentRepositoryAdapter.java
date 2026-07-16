@@ -14,10 +14,11 @@ public class JpaPaymentRepositoryAdapter implements PaymentRepositoryPort {
     }
 
     public Payment save(Payment payment){
-        //PaymentJpaEntity entity = mapper.toEntity(payment);
+        return PaymentMapper.toDomain(paymentJpaRepository.save(PaymentMapper.toEntity(payment)));
+    }
 
-        Payment paymenttest = Payment.completed("tx1", "acc1", 100.0, "USD");
-        PaymentJpaEntity entity = PaymentMapper.toEntity(payment);
-        return PaymentMapper.toDomain(paymentJpaRepository.save(entity));
+    @Override
+    public int countProcessed() {
+        return (int) paymentJpaRepository.count();
     }
 }

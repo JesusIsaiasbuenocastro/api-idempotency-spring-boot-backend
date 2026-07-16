@@ -8,5 +8,7 @@ public interface ProcessPaymentUseCase {
     }
 
     Payment save(PaymentCommand paymentCommand);
+    // Solo para fines demostrativos (contador de cobros reales que llegan a Postgres)
+    int countProcessedPayments();
 
 }
