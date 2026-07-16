@@ -10,4 +10,8 @@ public record Payment (
         String currency,
         PaymentStatus status,
         Instant processedAt
-){}
+){
+    public static Payment completed(String transactionId, String accountId, Double amount, String currency) {
+        return new Payment(transactionId, accountId, amount, currency, PaymentStatus.COMPLETED, Instant.now());
+    }
+}

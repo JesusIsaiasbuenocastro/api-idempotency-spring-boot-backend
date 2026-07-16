@@ -1,10 +1,12 @@
 package com.jesus.portafolio.idempotency.application.port.in;
 
+import com.jesus.portafolio.idempotency.domain.model.Payment;
+
 public interface ProcessPaymentUseCase {
 
     record PaymentCommand(String accountId, Double amount, String currency, String requestId) {
     }
 
-    <T> T save(PaymentCommand paymentCommand);
+    Payment save(PaymentCommand paymentCommand);
 
 }

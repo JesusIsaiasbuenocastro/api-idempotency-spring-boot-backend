@@ -30,7 +30,7 @@ public class InterceptorPaymentController {
 
 
     @PostMapping
-    @Idempotency(ttlSeconds=120)
+    @Idempotency(ttlSeconds=390)
     public ResponseEntity<PaymentResponse> postMethodName(@Valid @RequestBody PaymentRequest request) {
         var payment = processPaymentUseCase.save(PaymentWebMapper.toCommand(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(PaymentWebMapper.toResponse((Payment) payment));

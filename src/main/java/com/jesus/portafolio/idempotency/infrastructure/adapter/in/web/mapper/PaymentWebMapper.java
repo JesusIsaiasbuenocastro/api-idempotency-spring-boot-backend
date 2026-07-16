@@ -16,7 +16,7 @@ public final class PaymentWebMapper {
 
     public static PaymentResponse toResponse(Payment payment){
         return new PaymentResponse(
-                payment.transactionId(),
+                payment.transactionId() == null ? "" : payment.transactionId(),
                 payment.accountId(),
                 payment.amount(),
                 payment.currency(),

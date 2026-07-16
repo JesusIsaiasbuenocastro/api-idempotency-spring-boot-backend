@@ -27,4 +27,5 @@ replay_pid*
 
 target/*
 *application*.yml
-*/application.*
+src/main/resources/application-*.yml
+.idea/compiler.xml
