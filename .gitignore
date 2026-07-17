@@ -29,3 +29,5 @@ target/*
 *application*.yml
 src/main/resources/application-*.yml
 .idea/compiler.xml
+
+.DS_Store

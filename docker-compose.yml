@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: idempotency-postgres
+    environment:
+      POSTGRES_DB: idempotency_demo
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - idempotency-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d idempotency_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - idempotency-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: idempotency-redis
+    ports:
+      - "6379:6379"
+    # Sin volumen de persistencia a propósito: aquí Redis actúa como
+    # caché, no como fuente de verdad.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - idempotency-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: idempotency-app
+    ports:
+      - "8082:8082"
+    environment:
+      # Sobreescriben application.yml (que usa "localhost", pensado para
+      # correr la app fuera de Docker). Dentro de la red de docker-compose,
+      # los contenedores se resuelven por nombre de servicio, no localhost.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/idempotency_demo
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - idempotency-net
+
+networks:
+  idempotency-net:
+    driver: bridge
+
+volumes:
+  idempotency-postgres-data:
