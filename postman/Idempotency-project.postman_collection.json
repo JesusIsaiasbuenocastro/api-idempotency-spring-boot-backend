@@ -1,0 +1,198 @@
+{
+  "info": {
+    "_postman_id": "bef3e6a8-8c65-418a-93ab-5b7a0ece9dd5",
+    "name": "Idempotency-project",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "4825871"
+  },
+  "item": [
+    {
+      "name": "Interceptor",
+      "item": [
+        {
+          "name": "Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-idempotency-Key",
+                "value": "123121124test-TEST123222",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"accountId\":\"prueba2\",\n    \"amout\" : 25.90,\n    \"currency\": \"MXN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/payment",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "v1",
+                "payment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payment-Unsafe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-idempotency-Key",
+                "value": "123121124-TEST1",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"accountId\":\"prueba2\",\n    \"amout\" : 25.90,\n    \"currency\": \"MXN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/payment/unsafe",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                "unsafe"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/payment/executions-count",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                "executions-count"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Aspect",
+      "item": [
+        {
+          "name": "Payment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"accountId\":\"prueba2\",\n    \"amout\" : 26.90,\n    \"currency\": \"MXN\",\n    \"requestId\": \"TEST123121124-TEST11\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v2/payment",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "v2",
+                "payment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payment-Unsafe",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"accountId\":\"prueba2\",\n    \"amout\" : 26.90,\n    \"currency\": \"MXN\",\n    \"requestId\": \"TEST123121124-TEST11\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v2/payment/unsafe",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "v2",
+                "payment",
+                "unsafe"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v2/payment/executions-count",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "api",
+                "v2",
+                "payment",
+                "executions-count"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

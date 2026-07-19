@@ -270,16 +270,8 @@ docker compose down          # conserva el volumen de Postgres
 docker compose down -v       # borra también el volumen (datos de Postgres)
 ```
 
-## 6. Estado actual y mejoras pendientes
+---
 
-Notas "próximos pasos":
+Puedes probar los endpoints de la API importando manualmente el archivo de colección disponible en este repositorio:
 
-- **Manejo de errores incompleto**: `RedisIdempotencyStorageAdapter`
-  lanza `RuntimeException` genérica para los casos "solicitud en curso" y
-  "clave reutilizada con otro payload" (hay un comentario `// Cambiar por
-  una exception que extienda de RuntimeException` en el propio código).
-  Hoy eso se traduce en un `500 Internal Server Error` sin cuerpo
-  estructurado, en vez de un `409 Conflict` o `422 Unprocessable Entity`
-  con el formato que sí tiene `MissingIdempotencyKeyException` vía
-  `GlobalExceptionHandler`.
-- **`spring-boot-starter-aop`** Implementar `@aspect` como ejemplo de idempotencia.
+*   📥 [Descargar Colección de Postman](./postman/idempotency_api_collection.json)
