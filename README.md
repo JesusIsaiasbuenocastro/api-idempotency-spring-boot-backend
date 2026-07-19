@@ -274,4 +274,4 @@ docker compose down -v       # borra también el volumen (datos de Postgres)
 
 Puedes probar los endpoints de la API importando manualmente el archivo de colección disponible en este repositorio:
 
-*   📥 [Descargar Colección de Postman](./postman/postman/Idempotency-project.postman_collection.json)
+*   📥 [Descargar Colección de Postman](./postman/Idempotency-project.postman_collection.json)
