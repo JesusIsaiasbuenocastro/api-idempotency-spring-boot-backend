@@ -2,6 +2,7 @@ package com.jesus.portafolio.idempotency.infrastructure.adapter.out.redis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jesus.portafolio.idempotency.application.exception.IdempotencyConflictException;
 import com.jesus.portafolio.idempotency.application.port.out.IdempotencyDecision;
 import com.jesus.portafolio.idempotency.application.port.out.IdempotencyStoragePort;
 import com.jesus.portafolio.idempotency.application.port.out.IdempotentPayload;
@@ -55,9 +56,8 @@ public class RedisIdempotencyStorageAdapter implements IdempotencyStoragePort {
         RedisIdempotencyRecord existing = read(existingJson);
 
         if (existing.isInProgress()) {
-            //Cambiar por una exeption que extienda de runtimeexception
-            throw new RuntimeException(
-                    "Ya existe una solicitud en curso con esta Idempotency-Key. Reintenta en unos segundos.");
+            throw new IdempotencyConflictException(
+                   "IDEMPOTENCY_KEY_IN_PROGRESS", "Ya existe una solicitud en curso con esta Idempotency-Key. Reintenta en unos segundos.");
         }
 
         if (existing.isCompleted()) {
@@ -66,9 +66,9 @@ public class RedisIdempotencyStorageAdapter implements IdempotencyStoragePort {
                 return IdempotencyDecision.cached(new IdempotentPayload(
                         existing.httpStatus(), existing.body(), existing.contentType()));
             }
-            //Cambiar por una exeption que extienda de runtimeexception
-            throw new RuntimeException(
-                    "Esta Idempotency-Key ya se usó para una solicitud distinta. Usa una clave nueva por cada operación lógica.");
+            throw new IdempotencyConflictException(
+                    "IDEMPOTENCY_KEY_REUSED_DIFFERENT_PAYLOAD", "Esta Idempotency-Key ya se usó para una solicitud distinta. Usa una clave nueva por cada operación lógica.");
+
         }
 
         return IdempotencyDecision.proceed();

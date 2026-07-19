@@ -1,6 +1,6 @@
 package com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.mapper;
 
-import com.jesus.portafolio.idempotency.application.port.in.ProcessPaymentUseCase.PaymentCommand;
+import com.jesus.portafolio.idempotency.application.command.PaymentCommand;
 import com.jesus.portafolio.idempotency.domain.model.Payment;
 import com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.dto.PaymentRequest;
 import com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.dto.PaymentResponse;

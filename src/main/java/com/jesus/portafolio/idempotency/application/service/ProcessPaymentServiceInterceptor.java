@@ -1,5 +1,6 @@
 package com.jesus.portafolio.idempotency.application.service;
 
+import com.jesus.portafolio.idempotency.application.command.PaymentCommand;
 import com.jesus.portafolio.idempotency.application.port.in.ProcessPaymentUseCase;
 import com.jesus.portafolio.idempotency.application.port.out.PaymentRepositoryPort;
 import com.jesus.portafolio.idempotency.domain.model.Payment;

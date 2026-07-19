@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.jesus.portafolio.idempotency.application.exception.IdempotencyConflictException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +16,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingIdempotencyKeyException.class)
     public ResponseEntity<Object> handleMissingKey(MissingIdempotencyKeyException ex) {
         return build(HttpStatus.BAD_REQUEST, "MISSING_IDEMPOTENCY_KEY", ex.getMessage());
+    }
+
+    @ExceptionHandler(IdempotencyConflictException.class)
+    public ResponseEntity<Object> handleConflict(IdempotencyConflictException ex) {
+        return build(HttpStatus.CONFLICT, ex.getCode(), ex.getMessage());
     }
 
     private ResponseEntity<Object> build(HttpStatus status, String code, String message) {

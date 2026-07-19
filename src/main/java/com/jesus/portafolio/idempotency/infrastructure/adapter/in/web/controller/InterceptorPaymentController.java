@@ -6,6 +6,7 @@ import com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.dto.Paymen
 import com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.dto.PaymentResponse;
 import com.jesus.portafolio.idempotency.infrastructure.adapter.in.web.mapper.PaymentWebMapper;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,6 @@ public class InterceptorPaymentController {
     public InterceptorPaymentController(ProcessPaymentUseCase processPaymentUseCase) {
         this.processPaymentUseCase = processPaymentUseCase;
     }
-
 
     @PostMapping
     @Idempotency(ttlSeconds=86400)
